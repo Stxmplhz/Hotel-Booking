@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 const UserSchema = new mongoose.Schema({
   username: {
@@ -23,6 +24,10 @@ const UserSchema = new mongoose.Schema({
     default: "user",
     enum: ["user", "admin", "hotel"], 
   }
-}, { timestamps: true });
+}, { timestamps: true }); 
+
+UserSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
 
 export default mongoose.model("User", UserSchema);

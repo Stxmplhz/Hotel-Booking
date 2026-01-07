@@ -3,7 +3,13 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+
 import authRoute from "./routes/auth.js";
+import hotelsRoute from "./routes/hotels.js";
+import roomRoute from "./routes/room.js";
+import bookingsRoute from "./routes/booking.js"
+
+import cleanupExpiredBookings from "./utils/cron.js";
 
 const app = express();
 dotenv.config();
@@ -23,7 +29,6 @@ mongoose.connection.on("disconnected", () => {
 
 // Middlewares
 app.use(cors());
-app.use(express.json());
 app.use(cookieParser());
 app.use(express.json());
 
@@ -33,6 +38,10 @@ app.get("/", (req, res) => {
 
 // Routes
 app.use("/api/auth", authRoute);
+app.use("/api/hotels", hotelsRoute); 
+app.use("/api/room", roomRoute); 
+app.use("/api/bookings", bookingsRoute);
+// app.use("/api/review", reviewRoute); 
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
@@ -45,6 +54,8 @@ app.use((err, req, res, next) => {
     stack: err.stack
   });
 });
+
+cleanupExpiredBookings();
 
 app.listen(8800, () => {
   connect();
