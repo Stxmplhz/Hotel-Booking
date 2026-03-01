@@ -42,6 +42,7 @@ Currently, the system is fully functional for **Guest Users**. Admin and Partner
 | **Backend** | Node.js, JavaScript | API development and server-side logic. |
 | **Database** | MongoDB | Data storage for hotels, rooms, and bookings. |
 | **Task Runner** | Node-Cron | Handling scheduled tasks like auto-cancellation. |
+| **Deployment** | Vercel, Render.com | Automated CI/CD pipeline for frontend hosting and cloud API services. |
 
 ---
 
