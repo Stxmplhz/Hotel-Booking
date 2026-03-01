@@ -2,7 +2,7 @@ import Hotel from "../models/Hotel.js";
 import Room from "../models/Room.js";
 import { createError } from "../utils/error.js";
 import { roomSchema } from "../utils/validation.js";
-import { getDatesInRange } from "../utils/date.js";
+import { updateHotelCheapestPrice } from "../utils/hotel.js";
 
 export const createRoom = async ( req, res, next ) => {
     const validation = roomSchema.safeParse(req.body);
@@ -28,6 +28,8 @@ export const createRoom = async ( req, res, next ) => {
         } catch (err) {
             next(err);
         }
+        
+        updateHotelCheapestPrice(hotelId);
         res.status(200).json(savedRoom);
     } catch (err) {
         next(err);

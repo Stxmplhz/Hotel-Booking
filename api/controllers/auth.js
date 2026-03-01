@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { createError } from "../utils/error.js";
+import { DAY } from "../utils/time.js";
 
 export const register = async (req, res, next) => {
     try {
@@ -33,7 +34,8 @@ export const login = async (req, res, next) => {
 
         const token = jwt.sign(
             { id: user._id, role: user.role },
-            process.env.JWT_SECRET
+            process.env.JWT_SECRET,
+            { expiresIn: "3d" }
         )
 
         const { password, ...otherDetails } = user._doc;
@@ -41,6 +43,8 @@ export const login = async (req, res, next) => {
         res
         .cookie("access_token", token, {
             httpOnly: true,
+            expires: new Date(Date.now() + 3 * DAY),
+            secure: true,
         })
         .status(200)
         .json({ details: { ...otherDetails }, role: user.role });
@@ -57,13 +61,18 @@ export const googleAuth = async (req, res, next) => {
     if (user) {
       const token = jwt.sign(
         { id: user._id, role: user.role },
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET,
+        { expiresIn: "3d" }
       );
       
       const { password, ...otherDetails } = user._doc;
       
       res
-        .cookie("access_token", token, { httpOnly: true })
+        .cookie("access_token", token, { 
+          httpOnly: true,
+          expires: new Date(Date.now() + 3 * DAY),
+          secure: true,
+        })
         .status(200)
         .json({ details: { ...otherDetails }, role: user.role });
         
@@ -98,4 +107,11 @@ export const googleAuth = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+export const logout = (req, res) => {
+  res.clearCookie("access_token", {
+    sameSite: "none",
+    secure: true
+  }).status(200).send("User has been logged out.");
 };

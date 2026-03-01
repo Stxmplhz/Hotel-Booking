@@ -1,35 +1,83 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState ,useEffect, useContext } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import api from "./services/api.ts"
+import Header from "./components/layout/Header.tsx";
+import AuthModal from "./components/auth/AuthModal";
+import { AuthContext } from "./context/AuthContext";
+import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
+import { Home } from "./pages/Home.tsx";
+import { Hotels } from "./pages/Hotels.tsx"
+import { Hotel } from "./pages/Hotel.tsx"
+import { BookingCheckout } from "./pages/BookingCheckOut.tsx"
+import { MyBookings } from "./pages/MyBookings.tsx";
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [theme, setTheme] = useState(localStorage.getItem("mode") || "light")
+  const { user, dispatch, isAuthModalOpen, modalMode, openAuthModal, closeAuthModal } = useContext(AuthContext);
+
+  useEffect(() => {
+    localStorage.setItem("mode", theme);
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
+
+  const handleLoginSuccess = (userData: any) => {
+    dispatch({ type: "LOGIN_SUCCESS", payload: userData });
+    closeAuthModal();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await api.post("/auth/logout");
+      dispatch({ type: "LOGOUT" });
+      localStorage.removeItem("user");
+      alert("Logged out");
+    } catch (err) {
+      console.error(err);
+      dispatch({ type: "LOGOUT" });
+      localStorage.removeItem("user");
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <BrowserRouter>
+      <div className="min-h-screen transition-colors duration-300 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
+        <Header 
+          title="Stayly" 
+          theme={theme} 
+          setTheme={setTheme}
+          isLoggedIn={user !== null}
+          user={user}
+          onLoginClick={() => openAuthModal("login")} 
+          onRegisterClick={() => openAuthModal("register")}
+          onLogoutClick={handleLogout}
+        />
+        <main>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/hotels" element={<Hotels />} />
+            <Route path="/hotels/:id" element={<Hotel />} />
+
+            <Route element={<ProtectedRoute />}>
+              <Route path="/booking" element={<BookingCheckout />} />
+              <Route path="/mybookings" element={<MyBookings />} />
+            </Route>
+          </Routes>
+        </main>
+
+        <AuthModal 
+          isOpen={isAuthModalOpen}
+          onClose={closeAuthModal}
+          onLoginSuccess={handleLoginSuccess}
+          initialMode={modalMode}
+        />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </BrowserRouter> 
+  );
 }
 
 export default App

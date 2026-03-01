@@ -127,7 +127,9 @@ export const getHotelRooms = async ( req, res, next ) => {
             })
         );
 
-        res.status(200).json(list);
+        const validRooms = list.filter((room) => room !== null); 
+
+        res.status(200).json(validRooms); 
     } catch(err) {
         next(err);
     }

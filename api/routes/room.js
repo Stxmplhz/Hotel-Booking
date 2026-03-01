@@ -11,10 +11,14 @@ import { verifyAdmin } from "../utils/verifyToken.js";
 
 const router = express.Router();
 
+// --- CRUD for Admin ---
 router.post("/:hotelId", verifyAdmin, createRoom);
 router.put("/:id", verifyAdmin, updateRoom);
-router.put("/availability/:id", updateRoomAvailability);
 router.delete("/:id/:hotelId", verifyAdmin, deleteRoom);
+
+router.put("/availability/:id", updateRoomAvailability);
+
+// --- Fetch Data ---
 router.get("/:id", getRoom);
 router.get("/", getAllRooms);
 

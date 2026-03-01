@@ -1,0 +1,146 @@
+import { Check, Clock, Star, StarHalf } from 'lucide-react';
+import { formatTime } from '../../utils/time';
+import type { Room } from '../../types';
+
+interface BookingSummaryProps {
+  roomData: Room & { 
+    hotelName?: string; 
+    roomType?: string 
+  };
+  dates: {
+    startDate: Date;
+    endDate: Date;
+  }[];
+  options: {
+    adult: number;  
+    children: number;
+    room: number;
+  };
+  priceDetails: {
+    originalPrice: number;
+    nights: number;
+    discount: number;
+    taxesAndFees: number;
+    total: number;
+    originalSubtotal: number;
+  };
+  timeLeft: number;
+  rating: number;
+}
+
+export const BookingSummary = ({
+    roomData, dates, options, priceDetails, timeLeft, rating
+}: BookingSummaryProps) => {
+  const realSubtotal = priceDetails.total + priceDetails.discount - priceDetails.taxesAndFees;  
+  return (
+          <div className="lg:col-span-1">
+            <div className="lg:sticky lg:top-6">
+              <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+                {/* Red Alert Timer Bar */}
+                <div className="bg-red-600 text-white px-4 py-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-5 h-5" />
+                      <span className="text-sm">We're holding your price</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-mono tabular-nums">{formatTime(timeLeft)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <h2 className="text-2xl text-gray-900 dark:text-white mb-6">Booking Summary</h2>
+
+                  {/* Room Image */}
+                  <div className="rounded-lg overflow-hidden mb-4">
+                    <img
+                      src={roomData.photos ? roomData.photos[0] : ""}
+                      className="w-full h-40 object-cover"
+                    />
+                  </div>
+
+                  {/* Hotel Details with Rating */}
+                  <div className="mb-6">
+                    <h3 className="text-lg text-gray-900 dark:text-white mb-1">
+                      {roomData.hotelName || "Hotel Name"}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-2">{roomData.roomType}</p>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: 5 }).map((_, i) => {
+                        const starValue = i + 1;
+                        if (rating >= starValue) {
+                          return <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />; 
+                        } else if (rating >= starValue - 0.5) {
+                          return <StarHalf key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />;
+                        } else {
+                          return; /*<Star key={i} className="w-5 h-5 text-gray-300" />;*/
+                        }
+                      })}
+                      <span className="ml-1 text-sm text-gray-600 dark:text-gray-400">{rating}</span>
+                    </div>
+                  </div>
+
+                  {/* Dates & Guests */}
+                  <div className="space-y-3 mb-6 border-t border-gray-200 pt-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">Check-in</span>
+                      <span className="text-gray-900 dark:text-gray-300">
+                        {dates[0]?.startDate?.toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">Check-out</span>
+                      <span className="text-gray-900 dark:text-gray-300">
+                        {dates[0]?.endDate?.toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">Guests</span>
+                      <span className="text-gray-900 dark:text-gray-300">{options.adult} Adults</span>
+                      <span className="text-gray-900 dark:text-gray-300">{options.children} Children</span>
+                    </div>
+                  </div>
+
+                  {/* Price Breakdown */}
+                  <div className="space-y-3 mb-6 border-t border-gray-200 pt-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">${priceDetails.originalPrice} × {priceDetails.nights} nights</span>
+                      <span className="text-gray-500 dark:text-gray-400 line-through">${priceDetails.originalPrice * priceDetails.nights}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-green-600 dark:text-green-300">Discount</span>
+                      <span className="text-green-600 dark:text-green-300">-${priceDetails.discount * priceDetails.nights}</span>
+                    </div>
+
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
+                      <span className="text-gray-900 dark:text-gray-300">${realSubtotal}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">Taxes & Fees</span>
+                      <span className="text-gray-900 dark:text-gray-300">${priceDetails.taxesAndFees}</span>
+                    </div>
+                  </div>
+
+                  {/* Total */}
+                  <div className="flex justify-between items-center mb-6 border-t border-gray-200 pt-4">
+                    <span className="text-xl text-gray-900 dark:text-white">Total</span>
+                    <span className="text-3xl font-medium text-blue-700 dark:text-blue-400">${priceDetails.total}</span>
+                  </div>
+
+                  {/* Cancellation Policy */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex gap-2 dark:bg-[#8effb9]">
+                     <Check className="w-5 h-5 text-green-600 mt-0.5" />
+                     <div>
+                        <p className="text-s text-green-900">Free Cancellation</p>
+                        <p className="text-xs text-green-700">Cancel 24h before check-in</p>
+                     </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+        </div>
+    );
+}

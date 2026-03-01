@@ -8,8 +8,7 @@ import authRoute from "./routes/auth.js";
 import hotelsRoute from "./routes/hotels.js";
 import roomRoute from "./routes/room.js";
 import bookingsRoute from "./routes/booking.js"
-
-import cleanupExpiredBookings from "./utils/cron.js";
+import paymentRoute from "./routes/payment.js";
 
 const app = express();
 dotenv.config();
@@ -28,12 +27,16 @@ mongoose.connection.on("disconnected", () => {
 });
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173", 
+  credentials: true                
+}));
+
 app.use(cookieParser());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-    res.send("Hello form Backend!");
+  res.send("Hello form Backend!");
 })
 
 // Routes
@@ -41,6 +44,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/hotels", hotelsRoute); 
 app.use("/api/room", roomRoute); 
 app.use("/api/bookings", bookingsRoute);
+app.use("/api/payment", paymentRoute);
 // app.use("/api/review", reviewRoute); 
 
 // Error Handling Middleware
@@ -54,8 +58,6 @@ app.use((err, req, res, next) => {
     stack: err.stack
   });
 });
-
-cleanupExpiredBookings();
 
 app.listen(8800, () => {
   connect();

@@ -1,3 +1,3 @@
-const twentyMinutes = 20 * 60 * 1000;
-
-export default twentyMinutes ;
+export const MINUTE = 60 * 1000;
+export const HOUR = 60 * 60 * 1000;
+export const DAY = 24 * 60 * 60 * 1000;
