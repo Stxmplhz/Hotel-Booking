@@ -7,7 +7,7 @@ import cookieParser from "cookie-parser";
 import authRoute from "./routes/auth.js";
 import hotelsRoute from "./routes/hotels.js";
 import roomRoute from "./routes/room.js";
-import bookingsRoute from "./routes/booking.js"
+import bookingsRoute from "./routes/booking.js";
 import paymentRoute from "./routes/payment.js";
 
 const app = express();
@@ -27,39 +27,43 @@ mongoose.connection.on("disconnected", () => {
 });
 
 // Middlewares
-app.use(cors({
-  origin: "http://localhost:5173", 
-  credentials: true                
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true,
+  }),
+);
 
 app.use(cookieParser());
 app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("Hello form Backend!");
-})
+});
 
 // Routes
 app.use("/api/auth", authRoute);
-app.use("/api/hotels", hotelsRoute); 
-app.use("/api/room", roomRoute); 
+app.use("/api/hotels", hotelsRoute);
+app.use("/api/room", roomRoute);
 app.use("/api/bookings", bookingsRoute);
 app.use("/api/payment", paymentRoute);
-// app.use("/api/review", reviewRoute); 
+// app.use("/api/review", reviewRoute);
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
   const errorStatus = err.status || 500;
-  const errorMessage= err.message || "Something went wrong!";
+  const errorMessage = err.message || "Something went wrong!";
   return res.status(errorStatus).json({
     success: false,
     status: errorStatus,
     message: errorMessage,
-    stack: err.stack
+    stack: err.stack,
   });
 });
 
-app.listen(8800, () => {
+const PORT = process.env.PORT || 8800;
+
+app.listen(PORT, () => {
   connect();
-  console.log("Connected to backend! Port 8800");
+  console.log(`Connected to backend! Port ${PORT}`);
 });
