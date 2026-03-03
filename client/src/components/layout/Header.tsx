@@ -16,7 +16,6 @@ interface HeaderProps {
 }
 
 const Header = ({
-  title,
   theme,
   setTheme,
   isLoggedIn,
