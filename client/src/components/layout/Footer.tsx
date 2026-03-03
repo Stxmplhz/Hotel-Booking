@@ -8,9 +8,11 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="bg-gradient-to-br from-[#142976] to-[#3c59c0] p-2 rounded-lg">
-                <Hotel className="w-5 h-5 text-white" />
-              </div>
+              <img
+                src={"/public/logo-short.png"}
+                alt="Stayly Short Logo"
+                className="h-7"
+              />
               <span className="text-xl font-semibold text-white">Stayly</span>
             </div>
             <p className="text-sm text-gray-400">

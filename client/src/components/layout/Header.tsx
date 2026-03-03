@@ -36,10 +36,21 @@ const Header = ({
     <nav className="flex items-center justify-between px-6 py-4 bg-white dark:bg-blue-950 shadow-sm sticky top-0 z-50 transition-colors duration-300">
       {/* Left Section */}
       <div className="flex items-center gap-4">
-        {/* Logo */}
-        <h1 className="text-xl font-bold text-blue-600 dark:text-blue-400">
-          {title}
-        </h1>
+        <Link to="/">
+          {theme === "light" ? (
+            <img
+              src="/logo-full-black.png"
+              alt="Stayly Full Logo"
+              className="h-8 object-contain"
+            />
+          ) : (
+            <img
+              src="/logo-full-white.png"
+              alt="Stayly Full Logo"
+              className="h-8 object-contain"
+            />
+          )}
+        </Link>
 
         {/* Navigation Links */}
         <div className="hidden md:flex gap-2">
