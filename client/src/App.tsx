@@ -4,6 +4,7 @@ import api from "./services/api.ts";
 import Header from "./components/layout/Header.tsx";
 import { Footer } from "./components/layout/Footer.tsx";
 import AuthModal from "./components/auth/AuthModal";
+import { StatusModal } from "./components/ui/StatusModal.tsx";
 import { AuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
 import { Home } from "./pages/Home.tsx";
@@ -23,6 +24,7 @@ function App() {
     openAuthModal,
     closeAuthModal,
   } = useContext(AuthContext);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("mode", theme);
@@ -43,11 +45,12 @@ function App() {
       await api.post("/auth/logout");
       dispatch({ type: "LOGOUT" });
       localStorage.removeItem("user");
-      alert("Logged out");
+      setShowLogoutModal(true);
     } catch (err) {
       console.error(err);
       dispatch({ type: "LOGOUT" });
       localStorage.removeItem("user");
+      setShowLogoutModal(true);
     }
   };
 
@@ -77,6 +80,14 @@ function App() {
             </Route>
           </Routes>
         </main>
+
+        <StatusModal
+          isOpen={showLogoutModal}
+          onClose={() => setShowLogoutModal(false)}
+          type="success"
+          title="Logged Out"
+          message="You have been successfully logged out. See you again soon!"
+        />
 
         <AuthModal
           isOpen={isAuthModalOpen}

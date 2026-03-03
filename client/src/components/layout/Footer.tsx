@@ -9,7 +9,7 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <img
-                src={"/public/logo-short.png"}
+                src={"/logo-short.png"}
                 alt="Stayly Short Logo"
                 className="h-7"
               />
