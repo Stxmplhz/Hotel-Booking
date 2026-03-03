@@ -1,20 +1,27 @@
-import { useState ,useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import api from "./services/api.ts"
+import api from "./services/api.ts";
 import Header from "./components/layout/Header.tsx";
+import { Footer } from "./components/layout/Footer.tsx";
 import AuthModal from "./components/auth/AuthModal";
 import { AuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
 import { Home } from "./pages/Home.tsx";
-import { Hotels } from "./pages/Hotels.tsx"
-import { Hotel } from "./pages/Hotel.tsx"
-import { BookingCheckout } from "./pages/BookingCheckOut.tsx"
+import { Hotels } from "./pages/Hotels.tsx";
+import { Hotel } from "./pages/Hotel.tsx";
+import { BookingCheckout } from "./pages/BookingCheckOut.tsx";
 import { MyBookings } from "./pages/MyBookings.tsx";
 
 function App() {
-
-  const [theme, setTheme] = useState(localStorage.getItem("mode") || "light")
-  const { user, dispatch, isAuthModalOpen, modalMode, openAuthModal, closeAuthModal } = useContext(AuthContext);
+  const [theme, setTheme] = useState(localStorage.getItem("mode") || "light");
+  const {
+    user,
+    dispatch,
+    isAuthModalOpen,
+    modalMode,
+    openAuthModal,
+    closeAuthModal,
+  } = useContext(AuthContext);
 
   useEffect(() => {
     localStorage.setItem("mode", theme);
@@ -46,13 +53,13 @@ function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen transition-colors duration-300 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
-        <Header 
-          title="Stayly" 
-          theme={theme} 
+        <Header
+          title="Stayly"
+          theme={theme}
           setTheme={setTheme}
           isLoggedIn={user !== null}
           user={user}
-          onLoginClick={() => openAuthModal("login")} 
+          onLoginClick={() => openAuthModal("login")}
           onRegisterClick={() => openAuthModal("register")}
           onLogoutClick={handleLogout}
         />
@@ -69,15 +76,17 @@ function App() {
           </Routes>
         </main>
 
-        <AuthModal 
+        <AuthModal
           isOpen={isAuthModalOpen}
           onClose={closeAuthModal}
           onLoginSuccess={handleLoginSuccess}
           initialMode={modalMode}
         />
       </div>
-    </BrowserRouter> 
+
+      <Footer />
+    </BrowserRouter>
   );
 }
 
-export default App
+export default App;
