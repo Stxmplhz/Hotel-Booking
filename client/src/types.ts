@@ -1,22 +1,23 @@
 export interface User {
-  _id: string;    
+  _id: string;
   username: string;
   email: string;
   password?: string;
   img?: string;
-  role: 'user' | 'admin' | 'hotel';
+  phone?: string;
+  role: "user" | "admin" | "hotel";
   createdAt?: string;
   updatedAt?: string;
 }
 
 export interface Hotel {
-  _id: string;    
+  _id: string;
   name: string;
   type: string;
   city: string;
   address: string;
   distance: string;
-  photos: string[];  
+  photos: string[];
   description: string;
   rating: number;
   rooms: string[];
@@ -26,8 +27,8 @@ export interface Hotel {
   checkInTime: string;
   checkOutTime: string;
   cancellationPolicy: string;
-  taxRate?: number;      
-  serviceCharge?: number; 
+  taxRate?: number;
+  serviceCharge?: number;
 }
 
 export interface Room {
@@ -37,10 +38,10 @@ export interface Room {
   price: number;
   maxPeople: number;
   description: string;
-  roomNumbers: { 
-      number: number; 
-      unavailableDates: string[];
-      _id: string;
+  roomNumbers: {
+    number: number;
+    unavailableDates: string[];
+    _id: string;
   }[];
   photos: string[];
   bedType: string;
@@ -49,7 +50,12 @@ export interface Room {
   view: string;
 }
 
-export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'canceled'  | 'refunded';
+export type BookingStatus =
+  | "pending"
+  | "confirmed"
+  | "completed"
+  | "canceled"
+  | "refunded";
 
 export interface GuestDetails {
   firstName: string;
@@ -82,17 +88,17 @@ export interface HotelSnapshot {
 export interface Booking {
   _id: string;
   userId: string;
-  hotelId: Hotel | string; 
-  hotelDetails?: HotelSnapshot; 
+  hotelId: Hotel | string;
+  hotelDetails?: HotelSnapshot;
   rooms: {
     roomNumberId: string;
-    roomType?: string;  
-    unavailableDates: string[]; 
+    roomType?: string;
+    unavailableDates: string[];
   }[];
   guestDetails: GuestDetails;
   guestCount: GuestCount;
-  checkIn: string; 
-  checkOut: string; 
+  checkIn: string;
+  checkOut: string;
   priceDetails: PriceDetails;
   status: BookingStatus;
   cancellationPolicySnapshot?: string;
@@ -104,7 +110,7 @@ export interface Booking {
 export interface Coupon {
   _id: string;
   code: string;
-  discountType: 'percentage' | 'fixed';
+  discountType: "percentage" | "fixed";
   value: number;
   maxDiscount?: number;
   expirationDate: string;

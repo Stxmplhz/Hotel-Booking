@@ -11,6 +11,7 @@ import { Hotels } from "./pages/Hotels.tsx";
 import { Hotel } from "./pages/Hotel.tsx";
 import { BookingCheckout } from "./pages/BookingCheckOut.tsx";
 import { MyBookings } from "./pages/MyBookings.tsx";
+import { UserProfile } from "./pages/UserProfile.tsx";
 
 function App() {
   const [theme, setTheme] = useState(localStorage.getItem("mode") || "light");
@@ -72,6 +73,7 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/booking" element={<BookingCheckout />} />
               <Route path="/mybookings" element={<MyBookings />} />
+              <Route path="/profile" element={<UserProfile />} />
             </Route>
           </Routes>
         </main>

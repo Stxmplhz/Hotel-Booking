@@ -27,6 +27,7 @@ export const useBookings = () => {
   }, [fetchBookings]);
 
   const handleCancel = async (bookingId: string) => {
+    if (!user) return { success: false, message: "Please login first" };
     try {
       const res = await api.put(`/bookings/cancel/${bookingId}`, {});
 

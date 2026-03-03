@@ -1,11 +1,11 @@
 import express from "express";
-import { 
-    createRoom, 
-    updateRoom, 
-    updateRoomAvailability, 
-    deleteRoom, 
-    getRoom, 
-    getAllRooms,
+import {
+  createRoom,
+  updateRoom,
+  updateRoomAvailability,
+  deleteRoom,
+  getRoom,
+  getAllRooms,
 } from "../controllers/room.js";
 import { verifyAdmin } from "../utils/verifyToken.js";
 
@@ -22,4 +22,4 @@ router.put("/availability/:id", updateRoomAvailability);
 router.get("/:id", getRoom);
 router.get("/", getAllRooms);
 
-export default router;  
+export default router;

@@ -9,6 +9,7 @@ import hotelsRoute from "./routes/hotels.js";
 import roomRoute from "./routes/room.js";
 import bookingsRoute from "./routes/booking.js";
 import paymentRoute from "./routes/payment.js";
+import userRoute from "./routes/user.js";
 
 const app = express();
 dotenv.config();
@@ -35,7 +36,8 @@ app.use(
 );
 
 app.use(cookieParser());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 app.get("/", (req, res) => {
   res.send("Hello form Backend!");
@@ -47,6 +49,7 @@ app.use("/api/hotels", hotelsRoute);
 app.use("/api/room", roomRoute);
 app.use("/api/bookings", bookingsRoute);
 app.use("/api/payment", paymentRoute);
+app.use("/api/users", userRoute);
 // app.use("/api/review", reviewRoute);
 
 // Error Handling Middleware
