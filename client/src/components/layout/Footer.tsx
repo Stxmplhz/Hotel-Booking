@@ -1,4 +1,4 @@
-import { Hotel, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { Link } from "react-router";
 
 export function Footer() {
