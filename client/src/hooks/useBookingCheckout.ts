@@ -107,7 +107,9 @@ export const useBookingCheckout = () => {
     );
 
     if (!isFormComplete) {
-      alert("Please fill in all required guest details.");
+      alert(
+        "Please fill in all the required information before making a payment.",
+      );
       return false;
     }
 

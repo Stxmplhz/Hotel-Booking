@@ -9,11 +9,13 @@ import { Lock, AlertCircle, Info } from "lucide-react";
 interface CheckoutFormProps {
   total: number;
   handleBookingSubmit: (transactionId: string) => Promise<boolean>;
+  disabled: boolean;
 }
 
 export const CheckoutForm = ({
   total,
   handleBookingSubmit,
+  disabled,
 }: CheckoutFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -93,6 +95,13 @@ export const CheckoutForm = ({
         </div>
       </div>
 
+      {disabled && (
+        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-sm border border-blue-100 dark:border-blue-800 flex items-center gap-2">
+          <Info className="w-4 h-4" />
+          Please fill in all Guest Details before making a payment.
+        </div>
+      )}
+
       {/* --- Stripe Payment Element --- */}
       <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
         <PaymentElement />
@@ -100,10 +109,9 @@ export const CheckoutForm = ({
 
       {/* --- Submit Button --- */}
       <button
-        disabled={isProcessing || !stripe || !elements}
-        id="submit"
+        disabled={disabled || isProcessing || !stripe || !elements}
         className={`w-full h-14 text-lg rounded-xl shadow-lg transition-all text-white flex items-center justify-center mt-6 font-semibold
-            ${isProcessing ? "bg-gray-400 cursor-not-allowed scale-100" : "bg-[#3c59c0] hover:bg-[#3249a0] hover:shadow-xl active:scale-[0.98]"}
+            ${disabled || isProcessing ? "bg-gray-400 cursor-not-allowed" : "bg-[#3c59c0] hover:bg-[#3249a0] active:scale-[0.98]"}
         `}
       >
         {isProcessing ? (
