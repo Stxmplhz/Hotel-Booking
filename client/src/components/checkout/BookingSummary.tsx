@@ -1,4 +1,11 @@
-import { Check, Clock, Star, StarHalf, XCircle } from "lucide-react";
+import {
+  Check,
+  Clock,
+  Star,
+  StarHalf,
+  XCircle,
+  AlertTriangle,
+} from "lucide-react";
 import { formatTime } from "../../utils/time";
 import type { Room } from "../../types";
 
@@ -186,6 +193,7 @@ export const BookingSummary = ({
             {/* Cancellation Policy */}
             <div className="mt-4">
               {roomData.cancellationPolicy?.type === "non-refundable" ? (
+                /* 1. แบบไม่คืนเงิน (สีแดง) */
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex gap-2 dark:bg-red-900/20 dark:border-red-800">
                   <XCircle className="w-5 h-5 text-red-600 mt-0.5" />
                   <div>
@@ -197,7 +205,22 @@ export const BookingSummary = ({
                     </p>
                   </div>
                 </div>
+              ) : roomData.cancellationPolicy?.type === "partial" ? (
+                /* 2. แบบคืนเงินบางส่วน (สีส้ม/เหลือง) - เพิ่มตรงนี้ */
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-2 dark:bg-amber-900/20 dark:border-amber-800">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-amber-900 dark:text-amber-400">
+                      Partial Refund
+                    </p>
+                    <p className="text-xs text-amber-700 dark:text-amber-300">
+                      Cancel {roomData.cancellationPolicy.deadlineHours}h before
+                      check-in for a partial refund.
+                    </p>
+                  </div>
+                </div>
               ) : (
+                /* 3. แบบยกเลิกฟรี (สีเขียว) */
                 <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex gap-2 dark:bg-green-900/20 dark:border-green-800">
                   <Check className="w-5 h-5 text-green-600 mt-0.5" />
                   <div>
