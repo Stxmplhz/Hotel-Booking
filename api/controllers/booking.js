@@ -192,21 +192,23 @@ export const cancelBooking = async (req, res, next) => {
     );
     console.log(">>> [DB] Room inventory updated");
 
-    sendEmail({
-      to: booking.guestDetails.email,
-      subject: `Cancellation Successful - ${hotel.name}`,
-      html: `<h3>Your booking has been ${newStatus}</h3><p>Refund amount: $${refundAmount}</p>`,
-    })
-      .then(() => console.log(">>> [Email] Guest notified"))
-      .catch((err) => console.error(">>> [Email] Guest Error:", err.message));
-
-    sendEmail({
-      to: hotel.email,
-      subject: `Hotel Alert: Booking Cancelled`,
-      html: `<p>Booking ${booking._id} for ${booking.guestDetails.firstName} was cancelled.</p>`,
-    })
-      .then(() => console.log(">>> [Email] Hotel notified"))
-      .catch((err) => console.error(">>> [Email] Hotel Error:", err.message));
+    try {
+      await Promise.all([
+        sendEmail({
+          to: booking.guestDetails.email,
+          subject: `Cancellation Successful - ${hotel.name}`,
+          html: `<h3>Your booking has been ${newStatus}</h3><p>Refund amount: $${refundAmount}</p>`,
+        }),
+        sendEmail({
+          to: hotel.email || process.env.ADMIN_EMAIL,
+          subject: `Hotel Alert: Booking Cancelled`,
+          html: `<p>Booking ${booking._id} for ${booking.guestDetails.firstName} was cancelled.</p>`,
+        }),
+      ]);
+      console.log(">>> [Email] All notifications sent");
+    } catch (emailErr) {
+      console.error(">>> [Email Error]:", emailErr.message);
+    }
 
     res.status(200).json({
       message: "Cancellation processed successfully",

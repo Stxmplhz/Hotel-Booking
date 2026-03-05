@@ -26,7 +26,7 @@ export interface Hotel {
   featured: boolean;
   checkInTime: string;
   checkOutTime: string;
-  cancellationPolicy: string;
+  cancellationPolicy: CancellationPolicy;
   taxRate?: number;
   serviceCharge?: number;
 }
@@ -85,6 +85,13 @@ export interface HotelSnapshot {
   image: string;
 }
 
+export interface CancellationPolicy {
+  type: "free" | "non-refundable" | "partial";
+  deadlineHours: number;
+  refundPercentage: number;
+  description?: string;
+}
+
 export interface Booking {
   _id: string;
   userId: string;
@@ -101,7 +108,7 @@ export interface Booking {
   checkOut: string;
   priceDetails: PriceDetails;
   status: BookingStatus;
-  cancellationPolicySnapshot?: string;
+  cancellationPolicySnapshot?: CancellationPolicy;
   paymentMethod?: string;
   transactionId?: string;
   createdAt?: string;
