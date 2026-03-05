@@ -120,7 +120,62 @@ export const createBooking = async (req, res, next) => {
         );
       }),
     );
-    res.status(200).json(savedBooking);
+
+    try {
+      await Promise.all([
+        sendEmail({
+          to: savedBooking.guestDetails.email,
+          subject: `Confirmed: Your stay at ${hotel.name}`,
+          html: `
+            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e1e1e1; border-radius: 12px; overflow: hidden;">
+              <div style="background-color: #142976; color: white; padding: 24px; text-align: center;">
+                <h1 style="margin: 0; font-size: 24px;">Booking Confirmed!</h1>
+                <p style="margin: 8px 0 0; opacity: 0.8;">Reservation ID: #${savedBooking._id.toString().substring(18).toUpperCase()}</p>
+              </div>
+              <div style="padding: 32px; color: #333;">
+                <p style="font-size: 18px; margin-top: 0;">Hi <b>${savedBooking.guestDetails.firstName}</b>,</p>
+                <p>Your reservation at <b>${hotel.name}</b> is all set. We look forward to welcoming you!</p>
+                
+                <div style="background-color: #f8f9fa; border-radius: 8px; padding: 20px; margin: 24px 0;">
+                  <h3 style="margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 10px;">Stay Details</h3>
+                  <p style="margin: 10px 0;"><b>Check-in:</b> ${new Date(savedBooking.checkIn).toLocaleDateString("en-US", { weekday: "short", year: "numeric", month: "long", day: "numeric" })}</p>
+                  <p style="margin: 10px 0;"><b>Check-out:</b> ${new Date(savedBooking.checkOut).toLocaleDateString("en-US", { weekday: "short", year: "numeric", month: "long", day: "numeric" })}</p>
+                  <p style="margin: 10px 0;"><b>Room Type:</b> ${savedBooking.rooms[0].roomType}</p>
+                  <p style="margin: 10px 0; font-size: 18px; color: #142976;"><b>Total Paid:</b> $${savedBooking.priceDetails.totalPrice.toLocaleString()}</p>
+                </div>
+
+                <p style="font-size: 14px; color: #666;">Address: ${hotel.address}</p>
+              </div>
+              <div style="background-color: #f1f1f1; padding: 16px; text-align: center; font-size: 12px; color: #999;">
+                &copy; 2026 Stayly Booking. All rights reserved.
+              </div>
+            </div>
+          `,
+        }),
+
+        sendEmail({
+          to: hotel.email || process.env.ADMIN_EMAIL,
+          subject: `Alert: New Booking Received - ${savedBooking.guestDetails.firstName}`,
+          html: `
+            <div style="font-family: sans-serif; padding: 20px;">
+              <h2>New Reservation Received</h2>
+              <p>You have a new booking from <b>${savedBooking.guestDetails.firstName} ${savedBooking.guestDetails.lastName}</b>.</p>
+              <ul>
+                <li><b>Booking ID:</b> ${savedBooking._id}</li>
+                <li><b>Dates:</b> ${new Date(savedBooking.checkIn).toDateString()} - ${new Date(savedBooking.checkOut).toDateString()}</li>
+                <li><b>Revenue:</b> $${savedBooking.priceDetails.totalPrice}</li>
+              </ul>
+              <p>Please prepare the room accordingly.</p>
+            </div>
+          `,
+        }),
+      ]);
+      console.log(">>> [Email] All notifications sent");
+    } catch (emailErr) {
+      console.error(">>> [Email Error]:", emailErr.message);
+    }
+
+    return res.status(200).json(savedBooking);
   } catch (err) {
     next(err);
   }
@@ -196,16 +251,35 @@ export const cancelBooking = async (req, res, next) => {
       await Promise.all([
         sendEmail({
           to: booking.guestDetails.email,
-          subject: `Cancellation Successful - ${hotel.name}`,
-          html: `<h3>Your booking has been ${newStatus}</h3><p>Refund amount: $${refundAmount}</p>`,
+          subject: `Cancellation Confirmation - ${hotel.name}`,
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #f8d7da; border-radius: 12px; overflow: hidden;">
+              <div style="background-color: #dc3545; color: white; padding: 24px; text-align: center;">
+                <h1 style="margin: 0; font-size: 24px;">Booking Cancelled</h1>
+              </div>
+              <div style="padding: 32px; color: #333;">
+                <p>Hi ${booking.guestDetails.firstName},</p>
+                <p>Your reservation at <b>${hotel.name}</b> has been successfully cancelled.</p>
+                
+                <div style="border: 2px dashed #dc3545; border-radius: 8px; padding: 20px; text-align: center; margin: 24px 0;">
+                  <span style="font-size: 14px; color: #666; display: block; margin-bottom: 5px;">Refund Amount</span>
+                  <span style="font-size: 32px; font-weight: bold; color: #dc3545;">$${refundAmount.toLocaleString()}</span>
+                  <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                    ${refundAmount > 0 ? "*The refund will be processed to your original payment method within 5-10 business days." : "*This booking was non-refundable according to the policy."}
+                  </p>
+                </div>
+
+                <p style="font-size: 14px; color: #666;">Booking Reference: ${booking._id}</p>
+              </div>
+            </div>
+          `,
         }),
         sendEmail({
           to: hotel.email || process.env.ADMIN_EMAIL,
-          subject: `Hotel Alert: Booking Cancelled`,
-          html: `<p>Booking ${booking._id} for ${booking.guestDetails.firstName} was cancelled.</p>`,
+          subject: `Cancellation Alert: Booking #${booking._id.toString().substring(18)}`,
+          html: `<p>Booking for ${booking.guestDetails.firstName} was cancelled. The room inventory has been returned to the system.</p>`,
         }),
       ]);
-      console.log(">>> [Email] All notifications sent");
     } catch (emailErr) {
       console.error(">>> [Email Error]:", emailErr.message);
     }
