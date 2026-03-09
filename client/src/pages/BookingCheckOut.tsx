@@ -17,9 +17,10 @@ export function BookingCheckout() {
     priceDetails,
     timeLeft,
     clientSecret,
+    isInitializing,
     formData,
     handleInputChange,
-    onBookingSubmit,
+    handleProceedToPayment,
   } = useBookingCheckout();
 
   const isFormComplete =
@@ -44,27 +45,42 @@ export function BookingCheckout() {
               onChange={handleInputChange}
             />
 
-            {/* Payment Method */}
+            {/* Payment Section */}
             <div className="bg-white rounded-xl shadow-md p-8 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
               <h2 className="text-2xl text-gray-900 dark:text-white mb-2">
                 Payment Details
               </h2>
               {clientSecret ? (
-                <Elements
-                  stripe={stripePromise}
-                  options={{ clientSecret, appearance: { theme: "stripe" } }}
-                >
-                  <CheckoutForm
-                    total={priceDetails.total}
-                    handleBookingSubmit={onBookingSubmit}
-                    disabled={!isFormComplete}
-                  />
-                </Elements>
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 mt-4">
+                  <Elements
+                    stripe={stripePromise}
+                    options={{ clientSecret, appearance: { theme: "stripe" } }}
+                  >
+                    <CheckoutForm total={priceDetails.total} />
+                  </Elements>
+                </div>
               ) : (
-                <div className="flex justify-center p-10">
-                  <span className="text-gray-500">
-                    Loading payment secure server...
-                  </span>
+                <div className="mt-6">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Please confirm your guest details above to proceed with the
+                    secure payment.
+                  </p>
+                  <button
+                    onClick={handleProceedToPayment}
+                    disabled={!isFormComplete || isInitializing}
+                    className={`w-full h-14 text-lg rounded-xl shadow-lg transition-all text-white flex items-center justify-center font-semibold
+                      ${!isFormComplete || isInitializing ? "bg-gray-400 cursor-not-allowed" : "bg-[#3c59c0] hover:bg-[#3249a0] active:scale-[0.98]"}
+                    `}
+                  >
+                    {isInitializing ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Initializing Secure Payment...</span>
+                      </div>
+                    ) : (
+                      "Continue to Payment"
+                    )}
+                  </button>
                 </div>
               )}
             </div>

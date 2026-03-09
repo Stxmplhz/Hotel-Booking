@@ -16,12 +16,6 @@ export const createBooking = async (req, res, next) => {
     const hotel = await Hotel.findById(req.body.hotelId);
     if (!hotel) return next(createError(404, "Hotel not found!"));
 
-    if (req.body.paymentMethod === "Card" && !req.body.transactionId) {
-      return next(
-        createError(400, "Transaction ID (Payment Intent) is required."),
-      );
-    }
-
     const checkInDate = new Date(req.body.checkIn);
     const checkOutDate = new Date(req.body.checkOut);
     const timeDiff = checkOutDate.getTime() - checkInDate.getTime();
@@ -101,79 +95,10 @@ export const createBooking = async (req, res, next) => {
       },
       paymentMethod: "Card", // Stripe
       transactionId: req.body.transactionId,
-      status: "confirmed",
+      status: "pending",
     });
 
     const savedBooking = await newBooking.save();
-
-    await Promise.all(
-      req.body.rooms.map((item) => {
-        return Room.updateOne(
-          { "roomNumbers._id": item.roomNumberId },
-          {
-            $push: {
-              "roomNumbers.$.unavailableDates": {
-                $each: item.unavailableDates,
-              },
-            },
-          },
-        );
-      }),
-    );
-
-    try {
-      await Promise.all([
-        sendEmail({
-          to: savedBooking.guestDetails.email,
-          subject: `Confirmed: Your stay at ${hotel.name}`,
-          html: `
-            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e1e1e1; border-radius: 12px; overflow: hidden;">
-              <div style="background-color: #142976; color: white; padding: 24px; text-align: center;">
-                <h1 style="margin: 0; font-size: 24px;">Booking Confirmed!</h1>
-                <p style="margin: 8px 0 0; opacity: 0.8;">Reservation ID: #${savedBooking._id.toString().substring(18).toUpperCase()}</p>
-              </div>
-              <div style="padding: 32px; color: #333;">
-                <p style="font-size: 18px; margin-top: 0;">Hi <b>${savedBooking.guestDetails.firstName}</b>,</p>
-                <p>Your reservation at <b>${hotel.name}</b> is all set. We look forward to welcoming you!</p>
-                
-                <div style="background-color: #f8f9fa; border-radius: 8px; padding: 20px; margin: 24px 0;">
-                  <h3 style="margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 10px;">Stay Details</h3>
-                  <p style="margin: 10px 0;"><b>Check-in:</b> ${new Date(savedBooking.checkIn).toLocaleDateString("en-US", { weekday: "short", year: "numeric", month: "long", day: "numeric" })}</p>
-                  <p style="margin: 10px 0;"><b>Check-out:</b> ${new Date(savedBooking.checkOut).toLocaleDateString("en-US", { weekday: "short", year: "numeric", month: "long", day: "numeric" })}</p>
-                  <p style="margin: 10px 0;"><b>Room Type:</b> ${savedBooking.rooms[0].roomType}</p>
-                  <p style="margin: 10px 0; font-size: 18px; color: #142976;"><b>Total Paid:</b> $${savedBooking.priceDetails.totalPrice.toLocaleString()}</p>
-                </div>
-
-                <p style="font-size: 14px; color: #666;">Address: ${hotel.address}</p>
-              </div>
-              <div style="background-color: #f1f1f1; padding: 16px; text-align: center; font-size: 12px; color: #999;">
-                &copy; 2026 Stayly Booking. All rights reserved.
-              </div>
-            </div>
-          `,
-        }),
-
-        sendEmail({
-          to: hotel.email || process.env.ADMIN_EMAIL,
-          subject: `Alert: New Booking Received - ${savedBooking.guestDetails.firstName}`,
-          html: `
-            <div style="font-family: sans-serif; padding: 20px;">
-              <h2>New Reservation Received</h2>
-              <p>You have a new booking from <b>${savedBooking.guestDetails.firstName} ${savedBooking.guestDetails.lastName}</b>.</p>
-              <ul>
-                <li><b>Booking ID:</b> ${savedBooking._id}</li>
-                <li><b>Dates:</b> ${new Date(savedBooking.checkIn).toDateString()} - ${new Date(savedBooking.checkOut).toDateString()}</li>
-                <li><b>Revenue:</b> $${savedBooking.priceDetails.totalPrice}</li>
-              </ul>
-              <p>Please prepare the room accordingly.</p>
-            </div>
-          `,
-        }),
-      ]);
-      console.log(">>> [Email] All notifications sent");
-    } catch (emailErr) {
-      console.error(">>> [Email Error]:", emailErr.message);
-    }
 
     return res.status(200).json(savedBooking);
   } catch (err) {

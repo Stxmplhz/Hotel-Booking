@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import type { Hotel } from '../../types';
-import { getHotels } from '../../services/api';
+import type { Hotel } from "../../types";
+import { getHotels } from "../../services/api";
 import { useLocation } from "react-router-dom";
 import { FilterSidebar } from "./FilterSidebar";
 import { HotelResultCard } from "./HotelResultCard";
@@ -9,9 +9,13 @@ export function SearchResults() {
   const location = useLocation();
 
   // Receive input from SearchBar
-  const [destination, setDestination] = useState(location.state?.destination || "");
+  const [destination, setDestination] = useState(
+    location.state?.destination || "",
+  );
   const [dates, setDates] = useState(location.state?.dates || []);
-  const [options, setOptions] = useState(location.state?.options || { adult: 1 });
+  const [options, setOptions] = useState(
+    location.state?.options || { adult: 1 },
+  );
 
   const [hotelResults, setHotelResults] = useState<Hotel[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,18 +26,19 @@ export function SearchResults() {
   const [selectedStars, setSelectedStars] = useState<number[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [minRating, setMinRating] = useState<number>(0);
-  const [freeCancellationOnly, setFreeCancellationOnly] = useState<boolean>(false);
+  const [freeCancellationOnly, setFreeCancellationOnly] =
+    useState<boolean>(false);
 
   // Fetch Data from API
   useEffect(() => {
     const fetchHotels = async () => {
-      setLoading(true); 
+      setLoading(true);
       try {
         const searchParams = {
-            city: destination,
-            minPeople: options.adult, 
-            checkIn: dates[0] || undefined, 
-            checkOut: dates[1] || undefined, 
+          city: destination,
+          minPeople: options.adult,
+          checkIn: dates[0] || undefined,
+          checkOut: dates[1] || undefined,
         };
 
         const data = await getHotels(searchParams);
@@ -41,46 +46,55 @@ export function SearchResults() {
       } catch (err) {
         console.error(err);
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
     fetchHotels();
-  }, [destination, dates, options]); 
+  }, [destination, dates, options]);
 
   // Handle New Search
   useEffect(() => {
-     if (location.state) {
-        setDestination(location.state.destination);
-        setDates(location.state.dates);
-        setOptions(location.state.options);
-     }
+    if (location.state) {
+      setDestination(location.state.destination);
+      setDates(location.state.dates);
+      setOptions(location.state.options);
+    }
   }, [location]);
 
   // Client-side Filtering
   const filteredHotels = hotelResults.filter((hotel) => {
-    const matchPrice = 
-      hotel.cheapestPrice >= priceRange[0] && 
+    const matchPrice =
+      hotel.cheapestPrice >= priceRange[0] &&
       hotel.cheapestPrice <= priceRange[1];
 
-    const matchAmenities = selectedAmenities.length === 0 || 
-      selectedAmenities.every((amenity) => 
-        hotel.amenities?.includes(amenity)
+    const matchAmenities =
+      selectedAmenities.length === 0 ||
+      selectedAmenities.every((amenity) => hotel.amenities?.includes(amenity));
+
+    const matchStars =
+      selectedStars.length === 0 ||
+      selectedStars.some(
+        (star) => hotel.rating >= star && hotel.rating < star + 1,
       );
 
-    const matchStars = selectedStars.length === 0 || 
-      selectedStars.includes(Math.floor(hotel.rating || 0));
-
-    const matchType = selectedTypes.length === 0 || 
+    const matchType =
+      selectedTypes.length === 0 ||
       (hotel.type && selectedTypes.includes(hotel.type));
 
     const matchMinRating = (hotel.rating || 0) >= minRating;
 
-    const matchCancellation = !freeCancellationOnly || 
-      hotel.amenities?.includes("Free Cancellation") || 
-      hotel.amenities?.includes("Free cancellation");
-            
-      return matchPrice && matchAmenities && matchStars && matchType && matchMinRating && matchCancellation;
+    const matchCancellation =
+      !freeCancellationOnly || hotel.cancellationPolicy?.type === "free";
+
+    return (
+      matchPrice &&
+      matchAmenities &&
+      matchStars &&
+      matchType &&
+      matchMinRating &&
+      matchCancellation
+    );
   });
 
   return (
@@ -88,8 +102,12 @@ export function SearchResults() {
       {/* Search Header */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-400 py-6 px-6">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl text-gray-900 dark:text-white mb-2">Search Results</h1>
-          <p className="text-gray-600 dark:text-gray-400">{filteredHotels.length} properties found</p>
+          <h1 className="text-3xl text-gray-900 dark:text-white mb-2">
+            Search Results
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            {filteredHotels.length} properties found
+          </p>
         </div>
       </div>
 

@@ -1,7 +1,7 @@
-import { Star, MapPin, ExternalLink } from 'lucide-react';
-import type { Hotel } from '../../types';
+import { Star, MapPin, ExternalLink } from "lucide-react";
+import type { Hotel } from "../../types";
 import { Link } from "react-router-dom";
-import { getIcon } from "../shared/getIcon"
+import { getIcon } from "../shared/getIcon";
 
 interface HotelResultCardProps {
   hotel: Hotel;
@@ -36,7 +36,9 @@ export function HotelResultCard({ hotel }: HotelResultCardProps) {
             <div className="flex items-center gap-2 mb-3">
               <div className="flex items-center gap-1">
                 <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                <span className="text-gray-900 dark:text-gray-400 font-medium">{hotel.rating}</span>
+                <span className="text-gray-900 dark:text-gray-400 font-medium">
+                  {hotel.rating}
+                </span>
               </div>
               <span className="text-gray-400">•</span>
               <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
@@ -57,16 +59,18 @@ export function HotelResultCard({ hotel }: HotelResultCardProps) {
 
             {/* Amenities */}
             <div className="text-gray-700 dark:text-white leading-relaxed mb-4">
-              <h4 className="text-sm text-gray-500 dark:text-gray-300 mb-3">Amenities</h4>
+              <h4 className="text-sm text-gray-500 dark:text-gray-300 mb-3">
+                Amenities
+              </h4>
               <div className="flex flex-wrap gap-3">
                 {visibleAmenities.map((amenity) => (
-                <div
-                  key={amenity}
-                  className="flex items-center gap-2 text-sm text-gray-700 dark:text-white bg-gray-50  dark:bg-[#3c59c0] px-3 py-2 rounded-lg"
-                >
-                  {getIcon(amenity)}
-                  <span>{amenity}</span>
-                </div>
+                  <div
+                    key={amenity}
+                    className="flex items-center gap-2 text-sm text-gray-700 dark:text-white bg-gray-50  dark:bg-[#3c59c0] px-3 py-2 rounded-lg"
+                  >
+                    {getIcon(amenity)}
+                    <span>{amenity}</span>
+                  </div>
                 ))}
 
                 {remainingCount > 0 && (
@@ -81,14 +85,16 @@ export function HotelResultCard({ hotel }: HotelResultCardProps) {
           {/* Price and CTA */}
           <div className="flex items-end justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-400">
             <div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Price per night</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                Price per night
+              </div>
               <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                 ${hotel.cheapestPrice}
               </div>
             </div>
 
-            <Link 
-              to={`/hotels/${hotel._id}`} 
+            <Link
+              to={`/hotels/${hotel._id}`}
               className=" bg-blue-600 hover:bg-blue-700 text-white dark:text-white px-8 py-3 rounded-lg flex items-center gap-2 transition-colors"
             >
               <span>View Deal</span>

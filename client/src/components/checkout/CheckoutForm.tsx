@@ -8,15 +8,9 @@ import { Lock, AlertCircle, Info } from "lucide-react";
 
 interface CheckoutFormProps {
   total: number;
-  handleBookingSubmit: (transactionId: string) => Promise<boolean>;
-  disabled: boolean;
 }
 
-export const CheckoutForm = ({
-  total,
-  handleBookingSubmit,
-  disabled,
-}: CheckoutFormProps) => {
+export const CheckoutForm = ({ total }: CheckoutFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const [message, setMessage] = useState("");
@@ -31,38 +25,20 @@ export const CheckoutForm = ({
     setMessage("");
 
     try {
-      const { error, paymentIntent } = await stripe.confirmPayment({
+      const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
           return_url: `${window.location.origin}/mybookings`,
         },
-        redirect: "if_required",
       });
 
       if (error) {
         setMessage(error.message || "Payment failed.");
-        setIsProcessing(false);
-        return;
-      }
-
-      if (paymentIntent && paymentIntent.status === "succeeded") {
-        console.log("Payment Success! ID:", paymentIntent.id);
-
-        const bookingSuccess = await handleBookingSubmit(paymentIntent.id);
-
-        if (bookingSuccess) {
-          window.location.href = "/mybookings";
-        } else {
-          setMessage(
-            "Payment successful but booking failed. Please contact support with Ref: " +
-              paymentIntent.id,
-          );
-          setIsProcessing(false);
-        }
       }
     } catch (err) {
       console.error(err);
       setMessage("An unexpected error occurred.");
+    } finally {
       setIsProcessing(false);
     }
   };
@@ -95,13 +71,6 @@ export const CheckoutForm = ({
         </div>
       </div>
 
-      {disabled && (
-        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-sm border border-blue-100 dark:border-blue-800 flex items-center gap-2">
-          <Info className="w-4 h-4" />
-          Please fill in all Guest Details before making a payment.
-        </div>
-      )}
-
       {/* --- Stripe Payment Element --- */}
       <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
         <PaymentElement />
@@ -109,9 +78,9 @@ export const CheckoutForm = ({
 
       {/* --- Submit Button --- */}
       <button
-        disabled={disabled || isProcessing || !stripe || !elements}
+        disabled={isProcessing || !stripe || !elements}
         className={`w-full h-14 text-lg rounded-xl shadow-lg transition-all text-white flex items-center justify-center mt-6 font-semibold
-            ${disabled || isProcessing ? "bg-gray-400 cursor-not-allowed" : "bg-[#3c59c0] hover:bg-[#3249a0] active:scale-[0.98]"}
+            ${isProcessing || !stripe || !elements ? "bg-gray-400 cursor-not-allowed" : "bg-[#3c59c0] hover:bg-[#3249a0] active:scale-[0.98]"}
         `}
       >
         {isProcessing ? (

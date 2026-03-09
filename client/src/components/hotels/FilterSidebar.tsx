@@ -1,6 +1,6 @@
-import { Star } from 'lucide-react';
-import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { Star, Check } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 interface FilterSidebarProps {
   priceRange: [number, number];
@@ -19,28 +19,28 @@ interface FilterSidebarProps {
 }
 
 const amenitiesList = [
-  'Free WiFi',
-  'Restaurant',
-  'Room Service',
-  'Breakfast',
-  'Swimming Pool',
-  'Fitness Center',
-  'Parking',
-  'Bar',
-  'Lounge',
-  'Spa',
-  'Pet Friendly',
-  'Airport Shuttle',
-  'Traditional Massage',
+  "Free WiFi",
+  "Restaurant",
+  "Room Service",
+  "Breakfast",
+  "Swimming Pool",
+  "Fitness Center",
+  "Parking",
+  "Bar",
+  "Lounge",
+  "Spa",
+  "Pet Friendly",
+  "Airport Shuttle",
+  "Traditional Massage",
 ];
 
-const propertyTypes = ['Hotel', 'Resort', 'Boutique', 'Suite'];
+const propertyTypes = ["Hotel", "Resort", "Boutique", "Suite"];
 
 const guestRatings = [
-  { label: 'Excellent: 4.5+', value: 4.5 },
-  { label: 'Very Good: 4.0+', value: 4.0 },
-  { label: 'Good: 3.5+', value: 3.5 },
-  { label: 'Any', value: 0 }
+  { label: "Excellent: 4.5+", value: 4.5 },
+  { label: "Very Good: 4.0+", value: 4.0 },
+  { label: "Good: 3.5+", value: 3.5 },
+  { label: "Any", value: 0 },
 ];
 
 export function FilterSidebar({
@@ -56,14 +56,14 @@ export function FilterSidebar({
   setMinRating,
   freeCancellationOnly,
   setFreeCancellationOnly,
-  resultCount
+  resultCount,
 }: FilterSidebarProps) {
   const [openSections, setOpenSections] = useState({
     price: true,
     stars: true,
     propertyType: true,
     guestRating: true,
-    amenities: false
+    amenities: false,
   });
 
   const toggleSection = (section: keyof typeof openSections) => {
@@ -111,13 +111,13 @@ export function FilterSidebar({
     setFreeCancellationOnly(false);
   };
 
-   const hasActiveFilters = 
-    priceRange[0] !== 0 || 
-    priceRange[1] !== 500 || 
-    selectedAmenities.length > 0 || 
-    selectedStars.length > 0 || 
-    selectedTypes.length > 0 || 
-    minRating > 0 || 
+  const hasActiveFilters =
+    priceRange[0] !== 0 ||
+    priceRange[1] !== 500 ||
+    selectedAmenities.length > 0 ||
+    selectedStars.length > 0 ||
+    selectedTypes.length > 0 ||
+    minRating > 0 ||
     freeCancellationOnly;
 
   return (
@@ -126,7 +126,7 @@ export function FilterSidebar({
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl text-gray-900 dark:text-white">Filters</h2>
           {hasActiveFilters && (
-            <button 
+            <button
               onClick={clearAllFilters}
               className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-white font-medium"
             >
@@ -136,22 +136,34 @@ export function FilterSidebar({
         </div>
 
         {/* Free Cancellation */}
-        <div className="mb-6">
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="free-cancellation"
-              checked={freeCancellationOnly}
-              onChange={(e) => setFreeCancellationOnly(e.target.checked)}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-            />
-            <label
-              htmlFor="free-cancellation"
-              className="text-sm cursor-pointer text-gray-700 dark:text-white"
-            >
-              Free cancellation
-            </label>
-          </div>
+        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/10 rounded-xl border border-green-100 dark:border-green-800 shadow-sm">
+          <label className="flex items-center justify-between cursor-pointer group">
+            <div className="flex items-center gap-3">
+              <div className="p-1.5 bg-green-100 dark:bg-green-800 rounded-lg text-green-600 dark:text-green-400">
+                <Check className="w-4 h-4" strokeWidth={3} />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-green-900 dark:text-green-400 leading-none">
+                  Free Cancellation
+                </p>
+                <p className="text-[10px] text-green-700 dark:text-green-500 mt-1 uppercase tracking-tight">
+                  Risk-free booking
+                </p>
+              </div>
+            </div>
+
+            {/* Custom Styled Checkbox */}
+            <div className="relative inline-flex items-center">
+              <input
+                type="checkbox"
+                id="free-cancellation"
+                checked={freeCancellationOnly}
+                onChange={(e) => setFreeCancellationOnly(e.target.checked)}
+                className="peer sr-only"
+              />
+              <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-500"></div>
+            </div>
+          </label>
         </div>
 
         <hr className="my-6 border-gray-200" />
@@ -159,13 +171,13 @@ export function FilterSidebar({
         {/* Price Range Filter */}
         <div className="mb-6">
           <button
-            onClick={() => toggleSection('price')}
+            onClick={() => toggleSection("price")}
             className="flex items-center justify-between w-full mb-4"
           >
             <h3 className="text-gray-900 dark:text-white">Price per night</h3>
             <ChevronDown
               className={`w-5 h-5 text-gray-500 dark:text-white transition-transform ${
-                openSections.price ? 'transform rotate-180' : ''
+                openSections.price ? "transform rotate-180" : ""
               }`}
             />
           </button>
@@ -203,9 +215,15 @@ export function FilterSidebar({
               </div>
 
               <div className="flex items-center justify-between pt-2 px-1">
-                <span className="text-sm text-gray-700 dark:text-gray-400">${priceRange[0]}</span>
-                <span className="text-sm text-gray-500 dark:text-gray-200">-</span>
-                <span className="text-sm text-gray-700 dark:text-gray-400">${priceRange[1]}</span>
+                <span className="text-sm text-gray-700 dark:text-gray-400">
+                  ${priceRange[0]}
+                </span>
+                <span className="text-sm text-gray-500 dark:text-gray-200">
+                  -
+                </span>
+                <span className="text-sm text-gray-700 dark:text-gray-400">
+                  ${priceRange[1]}
+                </span>
               </div>
             </div>
           )}
@@ -216,13 +234,13 @@ export function FilterSidebar({
         {/* Star Rating Filter */}
         <div className="mb-6">
           <button
-            onClick={() => toggleSection('stars')}
+            onClick={() => toggleSection("stars")}
             className="flex items-center justify-between w-full mb-4"
           >
             <h3 className="text-gray-900 dark:text-white">Star Rating</h3>
             <ChevronDown
               className={`w-5 h-5 text-gray-500 dark:text-white transition-transform ${
-                openSections.stars ? 'transform rotate-180' : ''
+                openSections.stars ? "transform rotate-180" : ""
               }`}
             />
           </button>
@@ -243,7 +261,10 @@ export function FilterSidebar({
                     className="flex items-center gap-1 cursor-pointer"
                   >
                     {Array.from({ length: stars }).map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <Star
+                        key={i}
+                        className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                      />
                     ))}
                   </label>
                 </div>
@@ -257,13 +278,13 @@ export function FilterSidebar({
         {/* Property Type Filter */}
         <div className="mb-6">
           <button
-            onClick={() => toggleSection('propertyType')}
+            onClick={() => toggleSection("propertyType")}
             className="flex items-center justify-between w-full mb-4"
           >
             <h3 className="text-gray-900 dark:text-white">Property Type</h3>
             <ChevronDown
               className={`w-5 h-5 text-gray-500 dark:text-white transition-transform ${
-                openSections.propertyType ? 'transform rotate-180' : ''
+                openSections.propertyType ? "transform rotate-180" : ""
               }`}
             />
           </button>
@@ -279,7 +300,10 @@ export function FilterSidebar({
                     onChange={(e) => handleTypeChange(type, e.target.checked)}
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
                   />
-                  <label htmlFor={`type-${type}`} className="cursor-pointer text-gray-700 dark:text-white">
+                  <label
+                    htmlFor={`type-${type}`}
+                    className="cursor-pointer text-gray-700 dark:text-white"
+                  >
                     {type}
                   </label>
                 </div>
@@ -293,13 +317,13 @@ export function FilterSidebar({
         {/* Guest Rating Filter */}
         <div className="mb-6">
           <button
-            onClick={() => toggleSection('guestRating')}
+            onClick={() => toggleSection("guestRating")}
             className="flex items-center justify-between w-full mb-4"
           >
             <h3 className="text-gray-900 dark:text-white">Guest Rating</h3>
             <ChevronDown
               className={`w-5 h-5 text-gray-500 dark:text-white transition-transform ${
-                openSections.guestRating ? 'transform rotate-180' : ''
+                openSections.guestRating ? "transform rotate-180" : ""
               }`}
             />
           </button>
@@ -312,8 +336,8 @@ export function FilterSidebar({
                   onClick={() => setMinRating(rating.value)}
                   className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                     minRating === rating.value
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200 dark:text-gray-400 dark:bg-gray-700'
-                      : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      ? "bg-blue-50 text-blue-700 border border-blue-200 dark:text-gray-400 dark:bg-gray-700"
+                      : "text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
                   }`}
                 >
                   {rating.label}
@@ -324,17 +348,17 @@ export function FilterSidebar({
         </div>
 
         <hr className="my-6 border-gray-200" />
-        
+
         {/* Amenities Filter */}
         <div className="mb-6">
           <button
-            onClick={() => toggleSection('amenities')}
+            onClick={() => toggleSection("amenities")}
             className="flex items-center justify-between w-full mb-4"
           >
             <h3 className="text-gray-900 dark:text-white">Amenities</h3>
             <ChevronDown
               className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform ${
-                openSections.amenities ? 'transform rotate-180' : ''
+                openSections.amenities ? "transform rotate-180" : ""
               }`}
             />
           </button>
@@ -350,7 +374,10 @@ export function FilterSidebar({
                     onChange={() => handleAmenityChange(amenity)}
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
                   />
-                  <label htmlFor={`amenity-${amenity}`} className="cursor-pointer text-gray-700 dark:text-gray-400">
+                  <label
+                    htmlFor={`amenity-${amenity}`}
+                    className="cursor-pointer text-gray-700 dark:text-gray-400"
+                  >
                     {amenity}
                   </label>
                 </div>
@@ -363,7 +390,7 @@ export function FilterSidebar({
       {/* Show Results Button - Mobile */}
       <div className="lg:hidden border-t border-gray-200 p-4">
         <button className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors">
-          Show {resultCount} {resultCount === 1 ? 'Result' : 'Results'}
+          Show {resultCount} {resultCount === 1 ? "Result" : "Results"}
         </button>
       </div>
     </div>

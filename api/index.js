@@ -11,6 +11,8 @@ import bookingsRoute from "./routes/booking.js";
 import paymentRoute from "./routes/payment.js";
 import userRoute from "./routes/user.js";
 
+import { stripeWebhook } from "./controllers/stripeWebhook.js";
+
 const app = express();
 dotenv.config();
 
@@ -33,6 +35,12 @@ app.use(
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
   }),
+);
+
+app.post(
+  "/api/webhook",
+  express.raw({ type: "application/json" }),
+  stripeWebhook,
 );
 
 app.use(cookieParser());

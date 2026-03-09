@@ -50,6 +50,7 @@ export const useBookingCheckout = () => {
   // -- States --
   const [timeLeft, setTimeLeft] = useState(20 * 60);
   const [clientSecret, setClientSecret] = useState("");
+  const [isInitializing, setIsInitializing] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -57,15 +58,6 @@ export const useBookingCheckout = () => {
     phone: "",
     specialRequests: "",
   });
-
-  // -- Payment Intent --
-  useEffect(() => {
-    if (total > 0) {
-      createPayment({ amount: total })
-        .then((res) => setClientSecret(res.clientSecret))
-        .catch((err) => console.log("Payment Error:", err));
-    }
-  }, [total]);
 
   // -- Validation Redirect --
   useEffect(() => {
@@ -95,28 +87,19 @@ export const useBookingCheckout = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const onBookingSubmit = async (transactionId: string): Promise<boolean> => {
+  const handleProceedToPayment = async () => {
     if (!user) {
       alert("Please login...");
-      return false;
+      return;
     }
 
-    const requiredFields = ["firstName", "lastName", "email", "phone"];
-    const isFormComplete = requiredFields.every(
-      (field) => (formData as any)[field]?.trim() !== "",
-    );
-
-    if (!isFormComplete) {
-      alert(
-        "Please fill in all the required information before making a payment.",
-      );
-      return false;
-    }
+    setIsInitializing(true);
 
     try {
       const allDates = getDatesInRange(dates[0].startDate, dates[0].endDate);
 
-      await createBooking({
+      // 1. สร้าง Booking ในสถานะ "pending"
+      const bookingResponse = await createBooking({
         userId: user._id,
         hotelId: roomData.hotelId,
         rooms: [
@@ -135,25 +118,25 @@ export const useBookingCheckout = () => {
           totalPrice: total,
         },
         couponCode: isCouponApplied ? couponCode : null,
-        guestDetails: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone,
-          specialRequests: formData.specialRequests,
-        },
-        guestCount: {
-          adults: options.adult,
-          children: options.children,
-        },
-        transactionId: transactionId,
+        guestDetails: formData,
+        guestCount: { adults: options.adult, children: options.children },
         paymentMethod: "Card",
+        status: "pending",
       });
-      return true;
+
+      // 2. นำ Booking ID ไปขอ Payment Intent
+      const paymentResponse = await createPayment({
+        amount: total,
+        bookingId: bookingResponse._id, // ส่งไปให้ Webhook ใช้
+      });
+
+      // 3. เซ็ต Client Secret เพื่อเปิดใช้งานฟอร์ม Stripe
+      setClientSecret(paymentResponse.clientSecret);
     } catch (err) {
       console.error("Booking Error:", err);
-      alert("Booking creation failed.");
-      return false;
+      alert("Failed to initialize payment. Please try again.");
+    } finally {
+      setIsInitializing(false);
     }
   };
 
@@ -179,8 +162,9 @@ export const useBookingCheckout = () => {
     },
     timeLeft,
     clientSecret,
+    isInitializing,
     formData,
     handleInputChange,
-    onBookingSubmit,
+    handleProceedToPayment,
   };
 };
