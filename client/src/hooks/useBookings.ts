@@ -1,49 +1,65 @@
-import { useState, useEffect, useContext, useCallback } from "react";
+import { useContext } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../services/api";
 import { AuthContext } from "../context/AuthContext";
 import type { Booking } from "../types";
 
 export const useBookings = () => {
   const { user } = useContext(AuthContext);
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const queryClient = useQueryClient();
 
-  const fetchBookings = useCallback(async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      const res = await api.get(`/bookings/user/${user._id}`);
-      setBookings(res.data);
-    } catch (err: any) {
-      setError("Failed to load bookings");
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
+  const {
+    data: bookings = [],
+    isLoading: loading,
+    error,
+  } = useQuery<Booking[]>({
+    queryKey: ["bookings", user?._id],
+    queryFn: async () => {
+      const res = await api.get(`/bookings/user/${user?._id}`);
+      return res.data;
+    },
+    enabled: !!user,
+  });
 
-  useEffect(() => {
-    fetchBookings();
-  }, [fetchBookings]);
+  const cancelMutation = useMutation({
+    mutationFn: async (bookingId: string) => {
+      const res = await api.put(`/bookings/cancel/${bookingId}`);
+      return res.data;
+    },
+    onMutate: async (bookingId) => {
+      await queryClient.cancelQueries({ queryKey: ["bookings", user?._id] });
+      const previousBookings = queryClient.getQueryData<Booking[]>(["bookings", user?._id]);
+      queryClient.setQueryData<Booking[]>(["bookings", user?._id], (old) =>
+        old?.map((b) => (b._id === bookingId ? { ...b, status: "canceled" } : b))
+      );
+
+      return { previousBookings };
+    },
+    onError: (err, bookingId, context) => {
+      queryClient.setQueryData(["bookings", user?._id], context?.previousBookings);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookings", user?._id] });
+    },  
+  })
 
   const handleCancel = async (bookingId: string) => {
-    if (!user) return { success: false, message: "Please login first" };
+    if (!user) return { 
+      success: false, 
+      message: "Please login first" 
+    };
     try {
-      const res = await api.put(`/bookings/cancel/${bookingId}`, {});
-
-      if (res.status === 200) {
-        setBookings((prev) =>
-          prev.map((b) =>
-            b._id === bookingId ? { ...b, status: res.data.status } : b,
-          ),
-        );
-        return { success: true };
-      }
+      await cancelMutation.mutateAsync(bookingId);
+      return { 
+        success: true 
+      };
     } catch (err: any) {
-      const msg = err.response?.data?.message || "Cancellation failed";
-      return { success: false, message: msg };
+      return { 
+        success: false, 
+        message: err.response?.data?.message || "Cancellation failed" 
+      };
     }
-  };
+  }
 
   const categories = {
     upcoming: bookings.filter((b) => b.status === "confirmed"),
@@ -60,6 +76,6 @@ export const useBookings = () => {
     error,
     categories,
     handleCancel,
-    refresh: fetchBookings,
+    refresh: () => queryClient.invalidateQueries({ queryKey: ["bookings", user?._id] }),
   };
 };

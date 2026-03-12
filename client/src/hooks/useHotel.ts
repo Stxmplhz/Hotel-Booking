@@ -1,32 +1,21 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getHotel } from "../services/api";
 import type { Hotel } from "../types";
 
 export const useHotel = (id: string | undefined) => {
-  const [hotel, setHotel] = useState<Hotel | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { 
+    data: hotel, 
+    isLoading: loading, 
+    error
+  } =  useQuery<Hotel>({
+    queryKey: ["hotel", id],
+    queryFn: () => getHotel(id!),
+    enabled: !!id,
+  });
 
-  useEffect(() => {
-    const fetchHotel = async () => {
-      setLoading(true);
-      try {
-        if (id) {
-            const data = await getHotel(id);
-            setHotel(data); 
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load hotel data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) {
-        fetchHotel();
-    }
-  }, [id]);
-
-  return { hotel, loading, error };
+  return { 
+    hotel, 
+    loading, 
+    error: error ? (error as any).message : null 
+  };
 };

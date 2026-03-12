@@ -11,7 +11,7 @@ export function FeaturedHotels() {
     const fetchHotels = async () => {
       try {
         const data = await getFeaturedHotels();
-        setHotels(data);
+        setHotels(data.data);
       } catch (err) {
         console.error("Error fetching hotels:", err);
       } finally {

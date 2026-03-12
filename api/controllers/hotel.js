@@ -102,11 +102,18 @@ export const getAllHotels = async ( req, res, next ) => {
             query._id = { $in: hotelIdsFromRooms };
         }
    
+        const totalCount = await Hotel.countDocuments(query);
+
         const hotels = await Hotel.find(query)
             .limit(limitNum)
             .skip(skip);
 
-        res.status(200).json(hotels);
+        res.status(200).json({
+            data: hotels,                    
+            total: totalCount,               
+            currentPage: pageNum,           
+            hasNextPage: skip + hotels.length < totalCount 
+        });
     } 
     catch (err) {
         next(err);

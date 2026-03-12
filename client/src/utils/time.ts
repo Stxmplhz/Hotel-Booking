@@ -1,4 +1,5 @@
 export const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
+export const MINUTE = 1000 * 60;
 
 export const dayDifference = (date1: Date, date2: Date) => {
     const timeDiff = Math.abs(date2.getTime() - date1.getTime());

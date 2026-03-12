@@ -12,6 +12,7 @@ import paymentRoute from "./routes/payment.js";
 import userRoute from "./routes/user.js";
 
 import { stripeWebhook } from "./controllers/stripeWebhook.js";
+import { startCleanUpJob } from "./utils/cleanupJob.js";
 
 const app = express();
 dotenv.config();
@@ -77,4 +78,5 @@ const PORT = process.env.PORT || 8800;
 app.listen(PORT, () => {
   connect();
   console.log(`Connected to backend! Port ${PORT}`);
+  startCleanUpJob();
 });
