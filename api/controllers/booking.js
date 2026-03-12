@@ -98,6 +98,19 @@ export const createBooking = async (req, res, next) => {
       status: "pending",
     });
 
+    await Promise.all(
+      roomDetails.map((item) =>
+        Room.updateOne(
+          { "roomNumbers._id": item.roomNumberId },
+          {
+            $push: {
+              "roomNumbers.$.unavailableDates": { $each: item.unavailableDates },
+            },
+          }
+        )
+      )
+    );
+
     const savedBooking = await newBooking.save();
 
     return res.status(200).json(savedBooking);

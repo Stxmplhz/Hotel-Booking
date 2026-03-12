@@ -112,6 +112,7 @@ export interface Booking {
   paymentMethod?: string;
   transactionId?: string;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Coupon {

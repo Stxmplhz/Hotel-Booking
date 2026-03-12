@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useBookings } from '../../hooks/useBookings';
-import { CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, AlertCircle, ListFilter } from 'lucide-react';
 import type { Booking } from '../../types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/Tabs';
 import { BookingCard } from './BookingCard';
@@ -10,12 +10,16 @@ import { StatusModal } from '../ui/StatusModal';
 export function BookingHistory() {
     const [activeTab, setActiveTab] = useState('upcoming');
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+
+    const [sortBy, setSortBy] = useState<'soonest' | 'latest_booked'>('soonest');
+
     const { loading, error, categories, handleCancel } = useBookings();
     const [statusConfig, setStatusConfig] = useState<{
         isOpen: boolean;
         type: 'success' | 'error';
         message: string;
     }>({ isOpen: false, type: 'success', message: '' });
+
     const closeStatusModal = () => setStatusConfig(prev => ({ ...prev, isOpen: false }));
 
     const onCancelClick = async (id: string) => {
@@ -36,6 +40,19 @@ export function BookingHistory() {
         }
     };
 
+    const getSortedBookings = (list: Booking[]) => {
+        return [...list].sort((a, b) => {
+            if (sortBy === 'soonest') {
+                return new Date(a.checkIn).getTime() - new Date(b.checkIn).getTime();
+            } else if (sortBy === 'latest_booked') {
+                const dateA = a.createdAt ? new Date(a.createdAt).getTime() : new Date(a.checkIn).getTime();
+                const dateB = b.createdAt ? new Date(b.createdAt).getTime() : new Date(b.checkIn).getTime();
+                return dateB - dateA;
+            }
+            return 0;
+        });
+    };
+
     const renderBookingList = (
         list: Booking[], 
         emptyTitle: string, 
@@ -43,10 +60,12 @@ export function BookingHistory() {
         Icon: any,
         showBrowseBtn: boolean = false
     ) => {
-        if (list.length > 0) {
+        const sortedList = getSortedBookings(list);
+
+        if (sortedList.length > 0) {
             return (
                 <div className="space-y-6">
-                    {list.map((booking) => (
+                    {sortedList.map((booking) => (
                         <div 
                             key={booking._id} 
                             onClick={() => setSelectedBooking(booking)}
@@ -78,7 +97,7 @@ export function BookingHistory() {
         </div>
     );
 
-    if (error) return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
+    if (error) return <div className="min-h-screen flex items-center justify-center text-red-500">{error.message}</div>;
     
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -92,22 +111,50 @@ export function BookingHistory() {
 
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-6 py-8">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="w-full md:w-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1 mb-8">
-                        <TabsTrigger value="upcoming" className="flex-1 md:flex-none data-[state=active]:bg-[#6167c4] data-[state=active]:text-white dark:data-[state=active]:bg-[#6167c4] dark:text-gray-300">
-                            <Clock className="w-4 h-4 mr-2" /> Upcoming ({categories.upcoming.length})
-                        </TabsTrigger>
-                        <TabsTrigger value="completed" className="flex-1 md:flex-none data-[state=active]:bg-[#6167c4] data-[state=active]:text-white dark:data-[state=active]:bg-[#6167c4] dark:text-gray-300">
-                            <CheckCircle className="w-4 h-4 mr-2" /> Completed ({categories.completed.length})
-                        </TabsTrigger>
-                        <TabsTrigger value="canceled" className="flex-1 md:flex-none data-[state=active]:bg-[#6167c4] data-[state=active]:text-white dark:data-[state=active]:bg-[#6167c4] dark:text-gray-300">
-                            <XCircle className="w-4 h-4 mr-2" /> Canceled ({categories.canceled.length})
-                        </TabsTrigger>
-                        <TabsTrigger value="pending" className="flex-1 md:flex-none data-[state=active]:bg-[#6167c4] data-[state=active]:text-white dark:data-[state=active]:bg-[#6167c4] dark:text-gray-300">
-                            <AlertCircle className="w-4 h-4 mr-2" /> Pending ({categories.pending.length})
-                        </TabsTrigger>
-                    </TabsList>
+                
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full md:w-auto">
+                        <TabsList className="w-full md:w-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1">
+                            <TabsTrigger value="upcoming" className="flex-1 md:flex-none data-[state=active]:bg-[#6167c4] data-[state=active]:text-white dark:data-[state=active]:bg-[#6167c4] dark:text-gray-300">
+                                <Clock className="w-4 h-4 mr-2" /> Upcoming ({categories.upcoming.length})
+                            </TabsTrigger>
+                            <TabsTrigger value="completed" className="flex-1 md:flex-none data-[state=active]:bg-[#6167c4] data-[state=active]:text-white dark:data-[state=active]:bg-[#6167c4] dark:text-gray-300">
+                                <CheckCircle className="w-4 h-4 mr-2" /> Completed ({categories.completed.length})
+                            </TabsTrigger>
+                            <TabsTrigger value="canceled" className="flex-1 md:flex-none data-[state=active]:bg-[#6167c4] data-[state=active]:text-white dark:data-[state=active]:bg-[#6167c4] dark:text-gray-300">
+                                <XCircle className="w-4 h-4 mr-2" /> Canceled ({categories.canceled.length})
+                            </TabsTrigger>
+                            <TabsTrigger value="pending" className="flex-1 md:flex-none data-[state=active]:bg-[#6167c4] data-[state=active]:text-white dark:data-[state=active]:bg-[#6167c4] dark:text-gray-300">
+                                <AlertCircle className="w-4 h-4 mr-2" /> Pending ({categories.pending.length})
+                            </TabsTrigger>
+                        </TabsList>
+                    </Tabs>
 
+                    <div className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-lg shadow-sm">
+                        <ListFilter className="w-5 h-5 text-gray-500" />
+                        <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Sort by:</span>
+                        <select 
+                            value={sortBy} 
+                            onChange={(e) => setSortBy(e.target.value as any)}
+                            className="bg-transparent text-sm font-semibold text-gray-900 dark:text-gray-100 outline-none cursor-pointer"
+                        >
+                            <option 
+                                value="soonest" 
+                                className="bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100"
+                            >
+                                Check-in (Soonest)
+                            </option>
+                            <option 
+                                value="latest_booked" 
+                                className="bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100"
+                            >
+                                Latest Booking
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <Tabs value={activeTab} className="w-full">
                     <TabsContent value="upcoming">
                         {renderBookingList(categories.upcoming, "No upcoming trips", "Start planning your next adventure!", Clock, true)}
                     </TabsContent>
