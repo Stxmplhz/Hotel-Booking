@@ -1,5 +1,7 @@
-import { User, Calendar, LogOut } from "lucide-react";
+import { User, Calendar, LogOut, Shield } from "lucide-react";
 import { useNavigate } from "react-router";
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 interface ProfileSidebarProps {
   activeSection: string;
@@ -12,11 +14,18 @@ export function ProfileSidebar({
   onSectionChange,
   user,
 }: ProfileSidebarProps) {
+  const { dispatch } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch({ type: "LOGOUT" }); 
+    localStorage.removeItem("user");
+    navigate("/");
+  };
 
   const menuItems = [
     { id: "personal", label: "Personal Info", icon: User },
-    //{ id: "security", label: "Security", icon: Shield },
+    { id: "security", label: "Security", icon: Shield },
     //{ id: "wishlist", label: "Wishlist", icon: Heart },
     { id: "bookings", label: "My Bookings", icon: Calendar },
   ];
@@ -73,7 +82,7 @@ export function ProfileSidebar({
         </nav>
 
         <button
-          onClick={() => navigate("/")}
+          onClick={handleLogout}
           className="w-full flex items-center justify-center gap-2 py-3 text-red-600 border border-red-600  rounded-xl hover:bg-red-600 hover:text-white transition-colors font-medium"
         >
           <LogOut className="w-5 h-5" />

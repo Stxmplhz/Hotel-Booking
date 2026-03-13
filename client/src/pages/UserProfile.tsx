@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { ProfileSidebar } from "../components/profile/ProfileSidebar";
 import { PersonalInfoForm } from "../components/profile/PersonalInfoForm";
+import { SecuritySettingForm } from "../components/profile/SecuritySettingForm";
 
 export function UserProfile() {
   const [activeSection, setActiveSection] = useState<
@@ -13,6 +14,8 @@ export function UserProfile() {
     switch (activeSection) {
       case "personal":
         return <PersonalInfoForm />;
+      case "security":
+        return <SecuritySettingForm />;
       default:
         return <PersonalInfoForm />;
     }
