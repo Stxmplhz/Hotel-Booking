@@ -35,7 +35,7 @@ export const useBookings = () => {
 
       return { previousBookings };
     },
-    onError: (err, bookingId, context) => {
+    onError: (_err, _bookingId, context) => {
       queryClient.setQueryData(["bookings", user?._id], context?.previousBookings);
     },
     onSettled: () => {
